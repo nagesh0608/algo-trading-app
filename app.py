@@ -1,0 +1,83 @@
+import streamlit as st
+import yfinance as yf
+import pandas as pd
+import matplotlib.pyplot as plt
+
+st.set_page_config(layout="wide")
+
+st.title("📊 Interactive Algo Trading Dashboard")
+
+# ===== SIDEBAR =====
+st.sidebar.header("⚙️ Settings")
+
+stock = st.sidebar.text_input("Stock Symbol", "TCS.NS")
+
+start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2020-01-01"))
+end_date = st.sidebar.date_input("End Date", pd.to_datetime("2024-12-31"))
+
+ma_short = st.sidebar.slider("Short MA Window", 10, 100, 50)
+ma_long = st.sidebar.slider("Long MA Window", 100, 300, 200)
+
+# ===== DATA =====
+data = yf.download(stock, start=start_date, end=end_date)
+
+if data.empty:
+    st.error("No data found")
+else:
+    # Moving averages
+    data['MA_Short'] = data['Close'].rolling(ma_short).mean()
+    data['MA_Long'] = data['Close'].rolling(ma_long).mean()
+
+    # Signals
+    data['Signal'] = (data['MA_Short'] > data['MA_Long']).astype(int)
+    data['Position'] = data['Signal'].diff()
+
+    # Returns
+    data['Returns'] = data['Close'].pct_change()
+    data['Strategy_Returns'] = data['Returns'] * data['Signal'].shift(1)
+
+    # Cumulative
+    data['Cumulative_Market'] = (1 + data['Returns']).cumprod()
+    data['Cumulative_Strategy'] = (1 + data['Strategy_Returns']).cumprod()
+
+    # ===== METRICS =====
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("📈 Market Return", f"{(data['Cumulative_Market'].iloc[-1]-1)*100:.2f}%")
+    col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
+    col3.metric("📊 Data Points", len(data))
+
+    # ===== PRICE CHART =====
+    st.subheader("📉 Price & Signals")
+
+    fig, ax = plt.subplots(figsize=(12,5))
+
+    ax.plot(data['Close'], label='Close')
+    ax.plot(data['MA_Short'], label='MA Short')
+    ax.plot(data['MA_Long'], label='MA Long')
+
+    # Buy/Sell
+    ax.plot(data[data['Position']==1].index,
+            data['MA_Short'][data['Position']==1],
+            '^', markersize=10, label='Buy')
+
+    ax.plot(data[data['Position']==-1].index,
+            data['MA_Short'][data['Position']==-1],
+            'v', markersize=10, label='Sell')
+
+    ax.legend()
+    st.pyplot(fig)
+
+    # ===== PERFORMANCE =====
+    st.subheader("📊 Performance Comparison")
+
+    fig2, ax2 = plt.subplots(figsize=(12,5))
+    ax2.plot(data['Cumulative_Market'], label='Market')
+    ax2.plot(data['Cumulative_Strategy'], label='Strategy')
+    ax2.legend()
+
+    st.pyplot(fig2)
+
+    # ===== DATA TABLE =====
+    st.subheader("📋 Data Table")
+    st.dataframe(data.tail(50))
