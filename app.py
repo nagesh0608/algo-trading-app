@@ -81,6 +81,29 @@ else:
 
     # ===== METRICS =====
     col1, col2, col3, col4 = st.columns(4)
+    # Small signal badge
+if signal_text == "🟢 BUY":
+    color = "#28a745"
+elif signal_text == "🔴 SELL":
+    color = "#dc3545"
+else:
+    color = "#ffc107"
+
+col4.markdown(
+    f"""
+    <div style="
+        text-align:center;
+        padding:6px;
+        border-radius:8px;
+        background-color:{color};
+        color:white;
+        font-size:12px;
+        font-weight:bold;">
+        {signal_text}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
     col1.metric("📈 Market Return", f"{(data['Cumulative_Market'].iloc[-1]-1)*100:.2f}%")
     col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
