@@ -129,21 +129,30 @@ else:
     ax.scatter(sell_signals.index, sell_signals['Close'],
                color='red', s=100, label='SELL', marker='v')
 
-    # Label last BUY
+    # Safe annotation (no crash)
     if not buy_signals.empty:
         last_buy = buy_signals.iloc[-1]
-        ax.text(last_buy.name, last_buy['Close'], ' BUY',
-                color='green', fontsize=9)
+        if pd.notna(last_buy['Close']):
+            ax.annotate('BUY',
+                        (last_buy.name, last_buy['Close']),
+                        xytext=(0,10),
+                        textcoords='offset points',
+                        ha='center',
+                        color='green')
 
-    # Label last SELL
     if not sell_signals.empty:
         last_sell = sell_signals.iloc[-1]
-        ax.text(last_sell.name, last_sell['Close'], ' SELL',
-                color='red', fontsize=9)
+        if pd.notna(last_sell['Close']):
+            ax.annotate('SELL',
+                        (last_sell.name, last_sell['Close']),
+                        xytext=(0,-15),
+                        textcoords='offset points',
+                        ha='center',
+                        color='red')
 
-    # Highlight current price
+    # Current price highlight
     ax.scatter(data.index[-1], data['Close'].iloc[-1],
-               color='blue', s=150, label='Current Price')
+               color='blue', s=150, label='Current')
 
     ax.legend()
     st.pyplot(fig)
