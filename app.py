@@ -129,26 +129,32 @@ else:
     ax.scatter(sell_signals.index, sell_signals['Close'],
                color='red', s=100, label='SELL', marker='v')
 
-    # Safe annotation (no crash)
-    if not buy_signals.empty:
-        last_buy = buy_signals.iloc[-1]
-        if pd.notna(last_buy['Close']):
+    # SAFE annotation (no crash)
+    try:
+        if not buy_signals.empty:
+            last_buy = buy_signals.iloc[-1]
+            y_val = float(last_buy['Close'])
             ax.annotate('BUY',
-                        (last_buy.name, last_buy['Close']),
+                        (last_buy.name, y_val),
                         xytext=(0,10),
                         textcoords='offset points',
                         ha='center',
                         color='green')
+    except:
+        pass
 
-    if not sell_signals.empty:
-        last_sell = sell_signals.iloc[-1]
-        if pd.notna(last_sell['Close']):
+    try:
+        if not sell_signals.empty:
+            last_sell = sell_signals.iloc[-1]
+            y_val = float(last_sell['Close'])
             ax.annotate('SELL',
-                        (last_sell.name, last_sell['Close']),
+                        (last_sell.name, y_val),
                         xytext=(0,-15),
                         textcoords='offset points',
                         ha='center',
                         color='red')
+    except:
+        pass
 
     # Current price highlight
     ax.scatter(data.index[-1], data['Close'].iloc[-1],
