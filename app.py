@@ -86,7 +86,6 @@ else:
     col2.metric("Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
     col3.metric("Data Points", len(data))
 
-    # Small signal badge
     col4.markdown(
         f"""
         <div style="
@@ -112,21 +111,22 @@ else:
     ax.plot(data['MA_Short'], label='MA Short', alpha=0.6)
     ax.plot(data['MA_Long'], label='MA Long', alpha=0.6)
 
-    # BUY → ▲
+    # BUY → Yellow ▲
     buy_signals = data[data['Position'] == 1]
     ax.scatter(buy_signals.index, buy_signals['Close'],
-               color='black', s=120, label='BUY ▲',
-               marker='^')
+               color='#FFD700', s=140, label='BUY ▲',
+               marker='^', edgecolors='black')
 
-    # SELL → ▼
+    # SELL → Black ▼
     sell_signals = data[data['Position'] == -1]
     ax.scatter(sell_signals.index, sell_signals['Close'],
-               color='black', s=120, label='SELL ▼',
+               color='black', s=140, label='SELL ▼',
                marker='v')
 
-    # Current point
+    # CURRENT → Pink ▲
     ax.scatter(data.index[-1], data['Close'].iloc[-1],
-               color='blue', s=100, label='Current')
+               color='#ff69b4', s=160, label='CURRENT ▲',
+               marker='^', edgecolors='black')
 
     ax.legend(loc='upper left')
     st.pyplot(fig)
