@@ -5,7 +5,16 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(layout="wide")
 
-st.title("📊 Interactive Algo Trading Dashboard")
+col1, col2 = st.columns([5,1])
+
+with col1:
+    st.title("📊 Interactive Algo Trading Dashboard")
+
+with col2:
+    st.markdown(
+        "<p style='text-align:right; font-size:12px; color:gray;'> Author M Nagesh KLH</p>",
+        unsafe_allow_html=True
+    )
 
 # ===== STOCK LIST =====
 nifty50 = [
