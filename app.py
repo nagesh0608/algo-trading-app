@@ -56,11 +56,11 @@ else:
     data['MA_Short'] = data['Close'].rolling(ma_short).mean()
     data['MA_Long'] = data['Close'].rolling(ma_long).mean()
 
-    # Signals (for plotting crossover)
+    # Signals (for plotting)
     data['Signal'] = (data['MA_Short'] > data['MA_Long']).astype(int)
     data['Position'] = data['Signal'].diff()
 
-    # ===== CURRENT SIGNAL (NEW LOGIC 🔥) =====
+    # ===== CURRENT SIGNAL =====
     latest_ma_short = data['MA_Short'].iloc[-1]
     latest_ma_long = data['MA_Long'].iloc[-1]
 
@@ -81,34 +81,34 @@ else:
 
     # ===== METRICS =====
     col1, col2, col3, col4 = st.columns(4)
-    # Small signal badge
-if signal_text == "🟢 BUY":
-    color = "#28a745"
-elif signal_text == "🔴 SELL":
-    color = "#dc3545"
-else:
-    color = "#ffc107"
-
-col4.markdown(
-    f"""
-    <div style="
-        text-align:center;
-        padding:6px;
-        border-radius:8px;
-        background-color:{color};
-        color:white;
-        font-size:12px;
-        font-weight:bold;">
-        {signal_text}
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
     col1.metric("📈 Market Return", f"{(data['Cumulative_Market'].iloc[-1]-1)*100:.2f}%")
     col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
     col3.metric("📊 Data Points", len(data))
-    col4.metric("📢 Current Signal", signal_text)
+
+    # ===== SMALL SIGNAL BUTTON =====
+    if signal_text == "🟢 BUY":
+        color = "#28a745"
+    elif signal_text == "🔴 SELL":
+        color = "#dc3545"
+    else:
+        color = "#ffc107"
+
+    col4.markdown(
+        f"""
+        <div style="
+            text-align:center;
+            padding:6px;
+            border-radius:8px;
+            background-color:{color};
+            color:white;
+            font-size:12px;
+            font-weight:bold;">
+            {signal_text}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # ===== PRICE CHART =====
     st.subheader("📉 Price & Signals")
