@@ -7,10 +7,29 @@ st.set_page_config(layout="wide")
 
 st.title("📊 Interactive Algo Trading Dashboard")
 
+# ===== STOCK LIST =====
+nifty50 = [
+"TCS.NS","INFY.NS","RELIANCE.NS","HDFCBANK.NS","ICICIBANK.NS",
+"HINDUNILVR.NS","ITC.NS","LT.NS","SBIN.NS","BHARTIARTL.NS",
+"KOTAKBANK.NS","AXISBANK.NS","ASIANPAINT.NS","MARUTI.NS",
+"TITAN.NS","SUNPHARMA.NS","ULTRACEMCO.NS","NESTLEIND.NS",
+"POWERGRID.NS","NTPC.NS","BAJFINANCE.NS","BAJAJFINSV.NS",
+"ONGC.NS","WIPRO.NS","TECHM.NS","HCLTECH.NS","JSWSTEEL.NS",
+"TATASTEEL.NS","ADANIENT.NS","ADANIPORTS.NS","COALINDIA.NS",
+"GRASIM.NS","HEROMOTOCO.NS","CIPLA.NS","DRREDDY.NS",
+"EICHERMOT.NS","INDUSINDBK.NS","BRITANNIA.NS","APOLLOHOSP.NS",
+"DIVISLAB.NS","BPCL.NS","SHREECEM.NS","SBILIFE.NS",
+"HDFCLIFE.NS","UPL.NS","BAJAJ-AUTO.NS","TATAMOTORS.NS"
+]
+
+us_stocks = ["AAPL","GOOG","MSFT","TSLA","AMZN"]
+
+all_stocks = nifty50 + us_stocks
+
 # ===== SIDEBAR =====
 st.sidebar.header("⚙️ Settings")
 
-stock = st.sidebar.text_input("Stock Symbol", "TCS.NS")
+stock = st.sidebar.selectbox("Select Stock", all_stocks)
 
 start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", pd.to_datetime("2024-12-31"))
@@ -56,7 +75,6 @@ else:
     ax.plot(data['MA_Short'], label='MA Short')
     ax.plot(data['MA_Long'], label='MA Long')
 
-    # Buy/Sell
     ax.plot(data[data['Position']==1].index,
             data['MA_Short'][data['Position']==1],
             '^', markersize=10, label='Buy')
@@ -78,6 +96,6 @@ else:
 
     st.pyplot(fig2)
 
-    # ===== DATA TABLE =====
+    # ===== TABLE =====
     st.subheader("📋 Data Table")
     st.dataframe(data.tail(50))
