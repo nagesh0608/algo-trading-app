@@ -65,11 +65,11 @@ else:
     latest_ma_long = data['MA_Long'].iloc[-1]
 
     if latest_ma_short > latest_ma_long:
-        signal_text = "BUY ▲"
+        signal_text = "BUY "
     elif latest_ma_short < latest_ma_long:
-        signal_text = "SELL ▼"
+        signal_text = "SELL "
     else:
-        signal_text = "HOLD ●"
+        signal_text = "HOLD "
 
     # Returns
     data['Returns'] = data['Close'].pct_change().fillna(0)
