@@ -65,11 +65,11 @@ else:
     latest_ma_long = data['MA_Long'].iloc[-1]
 
     if latest_ma_short > latest_ma_long:
-        signal_text = "🟢 BUY"
+        signal_text = "BUY ▲"
     elif latest_ma_short < latest_ma_long:
-        signal_text = "🔴 SELL"
+        signal_text = "SELL ▼"
     else:
-        signal_text = "🟡 HOLD"
+        signal_text = "HOLD ●"
 
     # Returns
     data['Returns'] = data['Close'].pct_change().fillna(0)
@@ -82,25 +82,18 @@ else:
     # ===== METRICS =====
     col1, col2, col3, col4 = st.columns(4)
 
-    col1.metric("📈 Market Return", f"{(data['Cumulative_Market'].iloc[-1]-1)*100:.2f}%")
-    col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
-    col3.metric("📊 Data Points", len(data))
+    col1.metric("Market Return", f"{(data['Cumulative_Market'].iloc[-1]-1)*100:.2f}%")
+    col2.metric("Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
+    col3.metric("Data Points", len(data))
 
     # Small signal badge
-    if signal_text == "🟢 BUY":
-        color = "#28a745"
-    elif signal_text == "🔴 SELL":
-        color = "#dc3545"
-    else:
-        color = "#ffc107"
-
     col4.markdown(
         f"""
         <div style="
             text-align:center;
             padding:6px;
             border-radius:8px;
-            background-color:{color};
+            background-color:#333;
             color:white;
             font-size:12px;
             font-weight:bold;">
@@ -111,60 +104,35 @@ else:
     )
 
     # ===== PRICE CHART =====
-    st.subheader("📉 Price & Signals")
+    st.subheader("Price & Signals")
 
     fig, ax = plt.subplots(figsize=(12,5))
 
     ax.plot(data['Close'], label='Close Price')
-    ax.plot(data['MA_Short'], label='MA Short')
-    ax.plot(data['MA_Long'], label='MA Long')
+    ax.plot(data['MA_Short'], label='MA Short', alpha=0.6)
+    ax.plot(data['MA_Long'], label='MA Long', alpha=0.6)
 
-    # BUY signals
+    # BUY → ▲
     buy_signals = data[data['Position'] == 1]
     ax.scatter(buy_signals.index, buy_signals['Close'],
-               color='green', s=100, label='BUY', marker='^')
+               color='black', s=120, label='BUY ▲',
+               marker='^')
 
-    # SELL signals
+    # SELL → ▼
     sell_signals = data[data['Position'] == -1]
     ax.scatter(sell_signals.index, sell_signals['Close'],
-               color='red', s=100, label='SELL', marker='v')
+               color='black', s=120, label='SELL ▼',
+               marker='v')
 
-    # SAFE annotation (no crash)
-    try:
-        if not buy_signals.empty:
-            last_buy = buy_signals.iloc[-1]
-            y_val = float(last_buy['Close'])
-            ax.annotate('BUY',
-                        (last_buy.name, y_val),
-                        xytext=(0,10),
-                        textcoords='offset points',
-                        ha='center',
-                        color='green')
-    except:
-        pass
-
-    try:
-        if not sell_signals.empty:
-            last_sell = sell_signals.iloc[-1]
-            y_val = float(last_sell['Close'])
-            ax.annotate('SELL',
-                        (last_sell.name, y_val),
-                        xytext=(0,-15),
-                        textcoords='offset points',
-                        ha='center',
-                        color='red')
-    except:
-        pass
-
-    # Current price highlight
+    # Current point
     ax.scatter(data.index[-1], data['Close'].iloc[-1],
-               color='blue', s=150, label='Current')
+               color='blue', s=100, label='Current')
 
-    ax.legend()
+    ax.legend(loc='upper left')
     st.pyplot(fig)
 
     # ===== PERFORMANCE =====
-    st.subheader("📊 Performance Comparison")
+    st.subheader("Performance Comparison")
 
     fig2, ax2 = plt.subplots(figsize=(12,5))
     ax2.plot(data['Cumulative_Market'], label='Market')
@@ -174,5 +142,5 @@ else:
     st.pyplot(fig2)
 
     # ===== TABLE =====
-    st.subheader("📋 Data Table")
+    st.subheader("Data Table")
     st.dataframe(data.tail(50))
