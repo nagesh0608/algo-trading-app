@@ -75,16 +75,19 @@ else:
     col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
     col3.metric("📊 Data Points", len(data))
 
-    # ===== LATEST SIGNAL (NEW 🔥) =====
+    # ===== IMPROVED SIGNAL LOGIC =====
     latest_signal = data['Signal'].iloc[-1]
     latest_position = data['Position'].iloc[-1]
 
     if latest_position == 1:
-        signal_text = "🟢 BUY"
+        signal_text = "🟢 BUY (New Signal)"
     elif latest_position == -1:
-        signal_text = "🔴 SELL"
+        signal_text = "🔴 SELL (New Signal)"
     else:
-        signal_text = "🟡 HOLD"
+        if latest_signal == 1:
+            signal_text = "🟢 HOLD (Uptrend)"
+        else:
+            signal_text = "🔴 HOLD (Downtrend)"
 
     st.metric("📢 Current Signal", signal_text)
 
