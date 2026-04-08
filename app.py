@@ -56,7 +56,7 @@ else:
     data['MA_Short'] = data['Close'].rolling(ma_short).mean()
     data['MA_Long'] = data['Close'].rolling(ma_long).mean()
 
-    # Signals (for plotting)
+    # Signals
     data['Signal'] = (data['MA_Short'] > data['MA_Long']).astype(int)
     data['Position'] = data['Signal'].diff()
 
@@ -86,7 +86,7 @@ else:
     col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
     col3.metric("📊 Data Points", len(data))
 
-    # ===== SMALL SIGNAL BUTTON =====
+    # Small signal badge
     if signal_text == "🟢 BUY":
         color = "#28a745"
     elif signal_text == "🔴 SELL":
@@ -115,17 +115,35 @@ else:
 
     fig, ax = plt.subplots(figsize=(12,5))
 
-    ax.plot(data['Close'], label='Close')
+    ax.plot(data['Close'], label='Close Price')
     ax.plot(data['MA_Short'], label='MA Short')
     ax.plot(data['MA_Long'], label='MA Long')
 
-    ax.plot(data[data['Position']==1].index,
-            data['MA_Short'][data['Position']==1],
-            '^', markersize=10, label='Buy')
+    # BUY signals
+    buy_signals = data[data['Position'] == 1]
+    ax.scatter(buy_signals.index, buy_signals['Close'],
+               color='green', s=100, label='BUY', marker='^')
 
-    ax.plot(data[data['Position']==-1].index,
-            data['MA_Short'][data['Position']==-1],
-            'v', markersize=10, label='Sell')
+    # SELL signals
+    sell_signals = data[data['Position'] == -1]
+    ax.scatter(sell_signals.index, sell_signals['Close'],
+               color='red', s=100, label='SELL', marker='v')
+
+    # Label last BUY
+    if not buy_signals.empty:
+        last_buy = buy_signals.iloc[-1]
+        ax.text(last_buy.name, last_buy['Close'], ' BUY',
+                color='green', fontsize=9)
+
+    # Label last SELL
+    if not sell_signals.empty:
+        last_sell = sell_signals.iloc[-1]
+        ax.text(last_sell.name, last_sell['Close'], ' SELL',
+                color='red', fontsize=9)
+
+    # Highlight current price
+    ax.scatter(data.index[-1], data['Close'].iloc[-1],
+               color='blue', s=150, label='Current Price')
 
     ax.legend()
     st.pyplot(fig)
