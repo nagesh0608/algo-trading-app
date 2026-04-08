@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(layout="wide")
 
+# ===== HEADER =====
 col1, col2 = st.columns([5,1])
 
 with col1:
@@ -12,7 +13,7 @@ with col1:
 
 with col2:
     st.markdown(
-        "<p style='text-align:right; font-size:12px; color:gray;'> Author M Nagesh KLH</p>",
+        "<p style='text-align:right; font-size:12px; color:gray;'>Author: M Nagesh KLH</p>",
         unsafe_allow_html=True
     )
 
@@ -32,7 +33,6 @@ nifty50 = [
 ]
 
 us_stocks = ["AAPL","GOOG","MSFT","TSLA","AMZN"]
-
 all_stocks = nifty50 + us_stocks
 
 # ===== SIDEBAR =====
@@ -61,8 +61,8 @@ else:
     data['Position'] = data['Signal'].diff()
 
     # Returns
-    data['Returns'] = data['Close'].pct_change()
-    data['Strategy_Returns'] = data['Returns'] * data['Signal'].shift(1)
+    data['Returns'] = data['Close'].pct_change().fillna(0)
+    data['Strategy_Returns'] = data['Returns'] * data['Signal'].shift(1).fillna(0)
 
     # Cumulative
     data['Cumulative_Market'] = (1 + data['Returns']).cumprod()
@@ -74,6 +74,19 @@ else:
     col1.metric("📈 Market Return", f"{(data['Cumulative_Market'].iloc[-1]-1)*100:.2f}%")
     col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
     col3.metric("📊 Data Points", len(data))
+
+    # ===== LATEST SIGNAL (NEW 🔥) =====
+    latest_signal = data['Signal'].iloc[-1]
+    latest_position = data['Position'].iloc[-1]
+
+    if latest_position == 1:
+        signal_text = "🟢 BUY"
+    elif latest_position == -1:
+        signal_text = "🔴 SELL"
+    else:
+        signal_text = "🟡 HOLD"
+
+    st.metric("📢 Current Signal", signal_text)
 
     # ===== PRICE CHART =====
     st.subheader("📉 Price & Signals")
