@@ -56,9 +56,20 @@ else:
     data['MA_Short'] = data['Close'].rolling(ma_short).mean()
     data['MA_Long'] = data['Close'].rolling(ma_long).mean()
 
-    # Signals
+    # Signals (for plotting crossover)
     data['Signal'] = (data['MA_Short'] > data['MA_Long']).astype(int)
     data['Position'] = data['Signal'].diff()
+
+    # ===== CURRENT SIGNAL (NEW LOGIC 🔥) =====
+    latest_ma_short = data['MA_Short'].iloc[-1]
+    latest_ma_long = data['MA_Long'].iloc[-1]
+
+    if latest_ma_short > latest_ma_long:
+        signal_text = "🟢 BUY"
+    elif latest_ma_short < latest_ma_long:
+        signal_text = "🔴 SELL"
+    else:
+        signal_text = "🟡 HOLD"
 
     # Returns
     data['Returns'] = data['Close'].pct_change().fillna(0)
@@ -69,27 +80,12 @@ else:
     data['Cumulative_Strategy'] = (1 + data['Strategy_Returns']).cumprod()
 
     # ===== METRICS =====
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     col1.metric("📈 Market Return", f"{(data['Cumulative_Market'].iloc[-1]-1)*100:.2f}%")
     col2.metric("🤖 Strategy Return", f"{(data['Cumulative_Strategy'].iloc[-1]-1)*100:.2f}%")
     col3.metric("📊 Data Points", len(data))
-
-    # ===== IMPROVED SIGNAL LOGIC =====
-    latest_signal = data['Signal'].iloc[-1]
-    latest_position = data['Position'].iloc[-1]
-
-    if latest_position == 1:
-        signal_text = "🟢 BUY (New Signal)"
-    elif latest_position == -1:
-        signal_text = "🔴 SELL (New Signal)"
-    else:
-        if latest_signal == 1:
-            signal_text = "🟢 HOLD (Uptrend)"
-        else:
-            signal_text = "🔴 HOLD (Downtrend)"
-
-    st.metric("📢 Current Signal", signal_text)
+    col4.metric("📢 Current Signal", signal_text)
 
     # ===== PRICE CHART =====
     st.subheader("📉 Price & Signals")
